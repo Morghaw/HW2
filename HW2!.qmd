@@ -44,15 +44,6 @@ setwd("/Users/morganhawthorne/Downloads")
 
 ### 1 How long does it take Wake County Fire to respond to incidents, on average (i.e. the time between when an incident is dispatched and when firefighters arrive on the scene)? (hint: you can subtract lubridate date columns from each other). \[1 point\] \## ARIVE DATE- DISPATCH TIME
 
-```{r}
-data$year = year(data$arrivaltime) #filter the data by year 
-responsetime = data |>
-group_by(year) |>
-summarize(responsetime) #get the data filtered out and summarized 
-= mean(responsetime, na.rm = T)) #get the mean of the data and filter out the NA data
-
-
-```
 
 ```{r}
 
@@ -62,6 +53,7 @@ data$response <- as.numeric(difftime(data$arrive, data$dispatch, units = "mins")
 averageresponse <- mean(data$response, na.rm = TRUE)
 print(averageresponse)
 ```
+
 #take the data and filter it by year, month, and date 
 #filter it into a new data called averageresponse
 #print the average response 
@@ -79,11 +71,15 @@ stations <- data |>
   group_by(station) |>
   summarize(avgerageresponse = mean(response, na.rm = TRUE)) |> 
   arrange(averageresponse)
+
 print(stations) 
 ```
+### station 29 has the highest response time and station 13 has the lowest 
  #pipe into the next data subset 
  #summarize the data and the mean
  #group the data by station ans print it out into a collumn 
+
+
  
 ##3 Have Wake County Fire’s response times been going up or down over time? What might be the reason for these changes? \[0.5 points\]
 
@@ -91,12 +87,15 @@ print(stations)
 
 
 ```{r}
-data$year <- year(data$dispatch)
-fire_year <- data |>
+data$year <- year(data$arrive)
+fire_year_avg_response <- data |>
   group_by(year) |>
-  summarize(avgerageresponse = mean(dispatch, na.rm = TRUE)) 
-plot(fire_year)
+  summarize(avgerageresponse = mean(response, na.rm = TRUE)) 
+plot(fire_year_avg_response)
 ```
+
+# wake countys responses have been going up and down over the years, but they had an outlier around 2020 
+#the reason for this change may be covid and the issues during covid 
 #take the data only for the hour category 
 #group the data based on hour 
 #plot the data with hour on the x-line ans calls fire related on the Y
@@ -106,18 +105,17 @@ plot(fire_year)
 
 
 
-
-
 ```{r}
 data$hour <- hour(data$dispatch)
 call_timeofday <- data |>
   group_by(hour) |>
-  tally (name ="call time of day")
-plot(call_timeofday)
+summarize(call_count = n())
+
+call_timeofday
 ```
-#create a new filter for the data and see how many rows are in it 
-#filter the data between 100 and 200 only 
-# print the data out so you can view it 
+#create a new filter for the data and see how many rows are in it, filter the data between 100 and 200 only, print the data out so you can view it 
+
+#using the n()) command it tells me that most of the calls take place between 10 pm- and 2 am
 
 
 
@@ -128,17 +126,9 @@ count_data = sum(data$incident_type >= 100 & data$incident_type <= 173, na.rm = 
 
 count_data
 ```
+## there were 220,047 calls made in the data set (looking up the number of rows in the data set) out of these 17231 were real fires 
+#create a new name for data that is the sum of incident type  between 100 and 173, these are the numbers that represent incidents that are"real fires"
 
-```{r}
-firecalls <- nrow(data)
-actual <- data |>
-  filter(incident_type >= 100 & incident_type < 200) 
-fires <- nrow(actual)
-
-print(fires)
-```
-#create a new name for data that is the sum of incident type  between 100 and 173 
-# run the data to fet the numerical vale 
 
 ##6 It is reasonable that firefighters might respond more quickly to some types of incidents than others (e.g., a building fire, code 111 might be higher priority than a cat stuck in a tree, code 542). Using the reference guide linked above to determine appropriate incident codes, evaluate the average response time to actual fires. Is this response time faster than the average response time for all incidents? [0.5 points]
 
@@ -149,10 +139,9 @@ aveargeresponsetime_realfires <- mean(actual$response, na.rm = TRUE)
 print(averageresponse)
 print(aveargeresponsetime_realfires)
 ```
-#create a new data name by taking the average response time of the menan of actual fires 
-# print the average response time of both actual fires and all average response time 
-#take out the NA values 
-#print the average fires 
+#create a new data name by taking the average response time of the menan of actual fires, print the average response time of both actual fires and all average response time, take out the NA values, print the average fires 
+# the average response time to incidents was 5.312 minutes and the average response time to real fires was 5.18 minutes 
+# I think it is reasonable to conclude they would respond faster to real fires as this is more of an emergency 
 
 ###7 Repeat the analysis for questions 2-4 for actual fires, rather than all incidents. [3 points]
 ```{r}
@@ -180,10 +169,11 @@ plot(fire_calls)
 ###4
 ```{r}
 actual$hour <- hour(actual$dispatch)
-fire_calls <- actual |>
+call_timeofday <- actual |>
   group_by(hour) |>
-  tally (name ="fire calls")
-plot(fire_calls)
+summarize(call_count = n())
+
+call_timeofday
 
 
 ```
