@@ -1,0 +1,191 @@
+---
+title: "HW 2"
+author: "Morgan Hawthorne"
+format: html
+editor: visual
+---
+rm(list=ls())
+
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+\`\`\`r
+
+setwd("/Users/morganhawthorne/Downloads")
+
+\`\`\`
+
+```{r}
+ data <- read.csv("Fire_Incidents.csv")
+```
+
+### 1 How long does it take Wake County Fire to respond to incidents, on average (i.e. the time between when an incident is dispatched and when firefighters arrive on the scene)? (hint: you can subtract lubridate date columns from each other). \[1 point\] \## ARIVE DATE- DISPATCH TIME
+
+```{r}
+data$year = year(data$arrivaltime) #filter the data by year 
+responsetime = data |>
+group_by(year) |>
+summarize(responsetime) #get the data filtered out and summarized 
+= mean(responsetime, na.rm = T)) #get the mean of the data and filter out the NA data
+
+
+```
+
+```{r}
+
+data$dispatch <- ymd_hms(data$dispatch)
+data$arrive <- ymd_hms(data$arrive)
+data$response <- as.numeric(difftime(data$arrive, data$dispatch, units = "mins"))
+averageresponse <- mean(data$response, na.rm = TRUE)
+print(averageresponse)
+```
+#take the data and filter it by year, month, and date 
+#filter it into a new data called averageresponse
+#print the average response 
+# answer is ##318.7588 seconds or 5.3 minutes 
+
+
+
+### 2 Does this response time vary by station? What stations have the highest and lowest average response times? \[0.5 points\]
+
+
+```
+
+```{r}
+stations <- data |> 
+  group_by(station) |>
+  summarize(avgerageresponse = mean(response, na.rm = TRUE)) |> 
+  arrange(averageresponse)
+print(stations) 
+```
+ #pipe into the next data subset 
+ #summarize the data and the mean
+ #group the data by station ans print it out into a collumn 
+ 
+##3 Have Wake County Fire’s response times been going up or down over time? What might be the reason for these changes? \[0.5 points\]
+
+
+
+
+```{r}
+data$year <- year(data$dispatch)
+fire_year <- data |>
+  group_by(year) |>
+  summarize(avgerageresponse = mean(dispatch, na.rm = TRUE)) 
+plot(fire_year)
+```
+#take the data only for the hour category 
+#group the data based on hour 
+#plot the data with hour on the x-line ans calls fire related on the Y
+
+
+### 4 At what times of day are fire calls most likely to occur? \[1 point\]
+
+
+
+
+
+```{r}
+data$hour <- hour(data$dispatch)
+call_timeofday <- data |>
+  group_by(hour) |>
+  tally (name ="call time of day")
+plot(call_timeofday)
+```
+#create a new filter for the data and see how many rows are in it 
+#filter the data between 100 and 200 only 
+# print the data out so you can view it 
+
+
+
+
+### 5 The dataset contains all types of fire department calls, other than emergency medical services (which are removed to protect privacy). The codes for the different incident types can be found on page 3-22 of the National Fire Incident Reporting System Complete Reference Guide Links to an external site.. How many calls to Wake County Fire are recorded in this dataset, and how many of them are actual fires? [0.5 points]
+```{r}
+count_data = sum(data$incident_type >= 100 & data$incident_type <= 173, na.rm = T)
+
+count_data
+```
+
+```{r}
+firecalls <- nrow(data)
+actual <- data |>
+  filter(incident_type >= 100 & incident_type < 200) 
+fires <- nrow(actual)
+
+print(fires)
+```
+#create a new name for data that is the sum of incident type  between 100 and 173 
+# run the data to fet the numerical vale 
+
+##6 It is reasonable that firefighters might respond more quickly to some types of incidents than others (e.g., a building fire, code 111 might be higher priority than a cat stuck in a tree, code 542). Using the reference guide linked above to determine appropriate incident codes, evaluate the average response time to actual fires. Is this response time faster than the average response time for all incidents? [0.5 points]
+
+
+
+```{r}
+aveargeresponsetime_realfires <- mean(actual$response, na.rm = TRUE)
+print(averageresponse)
+print(aveargeresponsetime_realfires)
+```
+#create a new data name by taking the average response time of the menan of actual fires 
+# print the average response time of both actual fires and all average response time 
+#take out the NA values 
+#print the average fires 
+
+###7 Repeat the analysis for questions 2-4 for actual fires, rather than all incidents. [3 points]
+```{r}
+###2 running the same analysis I did for number two, but swapping some of the data 
+
+```{r}
+stations_response <- actual |> 
+  group_by(station) |>
+  summarize(aveargeresponsetime_realfires = mean(response, na.rm = TRUE)) |>
+  arrange(aveargeresponsetime_realfires)
+print(stations_response) 
+```
+
+###3
+
+```{r}
+actual$hour <- hour(actual$dispatch)
+fire_calls <- actual |>
+  group_by(hour) |>
+  tally (name ="fire calls")
+plot(fire_calls)
+```
+
+
+###4
+```{r}
+actual$hour <- hour(actual$dispatch)
+fire_calls <- actual |>
+  group_by(hour) |>
+  tally (name ="fire calls")
+plot(fire_calls)
+
+
+```
+
+\`\`\`
